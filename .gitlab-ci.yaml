@@ -1,0 +1,64 @@
+image: node:lts
+
+stages:
+  - cleanup
+  - build
+  - deploy
+  - test
+
+cache:
+  key: ${CI_COMMIT_REF_SLUG}
+  paths:
+    - ./node_modules
+
+variables:
+  DAYS_THRESHOLD: "50" # Set the number of days threshold for file cleanup
+  SSH_PRIVATE_KEY: $CI_DEPLOY_PRIVATE_KEY
+  SERVER_HOST: $SERVER_IP
+  SERVER_USER: $SERVER_USER
+  SERVER_PATH: "/var/www/duno_website/" # Adjust this path according to your server configuration
+  SERVER_PASSWORD: $SERVER_PASS
+
+cleanup:
+  stage: cleanup
+  script:
+    - echo "Cleaning up old files..."
+    - find ./ -type f -mtime +$DAYS_THRESHOLD -delete
+
+build_app:
+  stage: build
+  script:
+    - npm install # Install Node.js dependencies
+    - npx update-browserslist-db@latest # Update caniuse-lite database
+    - CI=false npm run build
+  artifacts:
+    paths:
+      - ./build # Store build output as an artifact
+
+before_script:
+  - apt-get update -qq && apt-get install
+  - apt-get install -y openssh-client
+
+deploy_production:
+  stage: deploy
+  script:
+    - echo "Deploying to production server..."
+    - eval $(ssh-agent -s)
+    - echo "$SSH_PRIVATE_KEY" | tr -d '\r' | ssh-add - > /dev/null # Load SSH key
+    - scp -o StrictHostKeyChecking=no -r ./build $SERVER_USER@$SERVER_HOST:$SERVER_PATH
+    - echo "$SERVER_PASSWORD"  | ssh -o StrictHostKeyChecking=no  $SERVER_USER@$SERVER_HOST "sudo -S chmod 755 /var/www/duno_website/build"
+  only:
+    - main # Deploy only when changes are pushed to the master branch
+  dependencies:
+    - build_app # Ensure this stage depends on the build stage
+
+test production:
+  stage: test
+  script:
+    - response_code=$(curl -s -o /dev/null -w "%{http_code}" "https://duno.asia")
+    - if [ "$response_code" -eq 200 ]; then
+      echo "Website is accessible! (HTTP 200 OK).";
+      else
+      echo "Website is not accessible. Received HTTP $response_code.";
+      exit 1;
+      fi

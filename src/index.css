@@ -1,0 +1,61 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat+Alternates:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @layer components {
+  li {
+    @apply p-4
+  }
+  button {
+    @apply bg-indigo-600 text-white border border-indigo-600 hover:bg-transparent hover:text-indigo-600 rounded-md
+  }
+} */
+* {
+  font-family: 'Montserrat Alternates', sans-serif;
+}
+
+/* .navBarTextColor {
+  color: #EA4227;
+  border: 2px solid #1C2437;
+} */
+.smNavTextColor {
+  color: #FEEAB7;
+}
+.backgroundColor {
+  background-color: #1C2437;
+}
+/* .heroText {
+  color: #EBDDBA;
+} */
+.serviceText {
+  color: #1C2437;
+}
+.btnContact {
+  background-color: #EBDDBA;
+  color: #1C2437;
+}
+:hover.btnContact {
+  border: 1px solid #EBDDBA !important;
+  color: #EBDDBA;
+}
+.navBarItem {
+  /* margin-right: 60px;  */
+}
+.navBarItem a{
+  color:white;
+}
+.navBarItem .active{
+  color:#EA4227
+}
+.servicePColor {
+  color: #FFFFFF;
+}
+
+
+
+
+
+
+
